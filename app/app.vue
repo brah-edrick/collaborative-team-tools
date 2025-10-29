@@ -3,37 +3,37 @@ import RadarChart from './components/RadarChart.vue'
 
 const categories = ref([
   {
-    name: 'Category 1',
+    name: 'Collaboration',
     id: '1',
     description: 'Description 1',
   },
   {
-    name: 'Category 2',
+    name: 'Execution',
     id: '2',
     description: 'Description 2',
   },
   {
-    name: 'Category 3',
+    name: 'Autonomy',
     id: '3',
     description: 'Description 3',
   },
   {
-    name: 'Category 4',
+    name: 'Quality',
     id: '4',
     description: 'Description 4',
   },
   {
-    name: 'Category 5',
+    name: 'Security',
     id: '5',
     description: 'Description 5',
   },
   {
-    name: 'Category 6',
+    name: 'Belonging',
     id: '6',
     description: 'Description 6',
   },
   {
-    name: 'Category 7',
+    name: 'Pride & Craft',
     id: '7',
     description: 'Description 7',
   },
@@ -43,6 +43,7 @@ const layers = ref([
   {
     name: 'layer1',
     color: '#3b82f6',
+    editable: true,
     categoryValues: {
       1: 4,
       2: 5,
@@ -56,6 +57,7 @@ const layers = ref([
   {
     name: 'layer2',
     color: '#ef4444',
+    editable: true,
     categoryValues: {
       1: 2,
       2: 3,
@@ -69,6 +71,7 @@ const layers = ref([
   {
     name: 'layer3',
     color: '#10b981',
+    editable: false,
     categoryValues: {
       1: 5,
       2: 4,

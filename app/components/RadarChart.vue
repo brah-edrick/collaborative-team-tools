@@ -10,6 +10,7 @@ interface Category {
 interface Layer {
   name: string
   color: string
+  editable: boolean
   categoryValues: Record<string, number>
 }
 
@@ -54,6 +55,13 @@ const LINGER_DURATION = 1000
 
 const validatedStepCount = computed(() => Math.max(2, props.stepCount))
 
+const isActiveLayerEditable = computed(() => {
+  const activeLayer = props.layers.find(
+    (layer) => layer.name === props.activeLayer
+  )
+  return activeLayer?.editable ?? false
+})
+
 const categoriesWithDefaultValues = ref([...props.categories])
 
 // Watch for changes in props.categories to update local state
@@ -77,7 +85,7 @@ const stepCircles = computed(() => {
   }))
 })
 
-const selectedPoints = computed(() => {
+const dragHandles = computed(() => {
   const activeLayer = props.layers.find(
     (layer) => layer.name === props.activeLayer
   )
@@ -119,10 +127,6 @@ const allLayerPolygons = computed(() => {
       if (b.layerName === props.activeLayer) return -1
       return 0
     })
-})
-
-const selectedPointsString = computed(() => {
-  return selectedPoints.value.map((point) => `${point.x},${point.y}`).join(' ')
 })
 
 const spines = computed(() => {
@@ -305,6 +309,8 @@ const clearLingerTimer = () => {
 // ============================================================================
 
 const startDraggingPoint = (event: MouseEvent, spineIndex: number) => {
+  if (!isActiveLayerEditable.value) return
+
   clearLingerTimer()
   draggedSpineIndex.value = spineIndex
   isDragging.value = true
@@ -358,6 +364,7 @@ const hideRingLabelsOnLeave = () => {
 }
 
 const selectPointByClick = (categoryIndex: number, pointIndex: number) => {
+  if (!isActiveLayerEditable.value) return
   if (categoriesWithDefaultValues.value[categoryIndex] === undefined) return
 
   const activeLayer = props.layers.find(
@@ -424,7 +431,7 @@ const selectPointByClick = (categoryIndex: number, pointIndex: number) => {
             :r="2"
             :stroke="props.radarSkeleton.strokeColor"
             :stroke-width="props.radarSkeleton.strokeWidth"
-            class="valid-point"
+            :class="['valid-point', { editable: isActiveLayerEditable }]"
             fill="white"
           />
         </template>
@@ -446,9 +453,10 @@ const selectPointByClick = (categoryIndex: number, pointIndex: number) => {
           pointer-events="none"
         />
 
-        <!-- Selected Points -->
+        <!-- Drag Handles -->
         <circle
-          v-for="(point, idx) in selectedPoints"
+          v-if="isActiveLayerEditable"
+          v-for="(point, idx) in dragHandles"
           @mousedown="startDraggingPoint($event, idx)"
           @mouseenter="showRingLabelsOnHover(idx)"
           @mouseleave="hideRingLabelsOnLeave"
@@ -456,7 +464,7 @@ const selectPointByClick = (categoryIndex: number, pointIndex: number) => {
           :cx="point.x"
           :cy="point.y"
           :r="3"
-          class="selected-point"
+          class="drag-handle"
           fill="white"
           :stroke="
             props.layers.find((l) => l.name === props.activeLayer)?.color ||
@@ -511,11 +519,11 @@ const selectPointByClick = (categoryIndex: number, pointIndex: number) => {
   cursor: grabbing;
 }
 
-.selected-point {
+.drag-handle {
   cursor: grab;
 }
 
-.selected-point:active {
+.drag-handle:active {
   cursor: grabbing;
 }
 
@@ -523,7 +531,7 @@ const selectPointByClick = (categoryIndex: number, pointIndex: number) => {
   cursor: pointer;
 }
 
-.valid-point:hover {
+.valid-point.editable:hover {
   stroke: v-bind(
     'props.layers.find(l => l.name === props.activeLayer)?.color || "#3b82f6"'
   );
